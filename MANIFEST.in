@@ -1,0 +1,4 @@
+include requirements_*.txt
+include README.rst
+include version.txt
+include gcg/templates/*

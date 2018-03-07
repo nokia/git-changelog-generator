@@ -1,0 +1,4 @@
+{% for e in entries %}* {{ headers[e]['date_rpm'] }} {{ headers[e]['author'] }} <{{ headers[e].email }}> - {{ headers[e].version }}
+{%   for c in entries[e] %}- {{ c | commit_headline }} (rev.{{ c.hexsha[0:8] }})
+{%   endfor %}
+{% endfor %}
