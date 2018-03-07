@@ -1,0 +1,6 @@
+pip>=9.0.1
+jinja2>=2.10
+semver>=2.0.1
+GitPython>=1.0.1
+stdeb==0.8.5
+pytest-runner==4.0

@@ -1,0 +1,15 @@
+.idea/
+*.pyc
+build/
+dist/
+venv/
+cover/
+.eggs/
+*.egg-info/
+.coverage
+deb_dist/
+*.tar.gz
+*.tgz
+.pytest_cache/
+coverage.xml
+htmlcov/

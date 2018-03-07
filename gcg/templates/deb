@@ -1,0 +1,8 @@
+{% for e in entries %}{{ headers[e]['deb_name'] }} ({{ headers[e]['version'] }}) {{ headers[e]['deb_distro'] }}; urgency={{ headers[e]['deb_urgency'] }}
+
+{%   for c in entries[e] %}  * {{ c.message.split('\n', 1)[0].strip() }} (rev.{{ c.hexsha[0:8] }})
+{%   endfor %}
+
+ -- {{ headers[e]['author'] }} <{{ headers[e]['email'] }}>   {{ headers[e]['date_deb'] }}
+
+{% endfor %}
