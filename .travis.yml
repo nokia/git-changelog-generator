@@ -2,6 +2,11 @@ language: python
 script: pytest
 install: pip install -r requirements_setup.txt -r requirements_test.txt
 test:
-  - python setup.py test
-build:
-  - python setup.py build
+  - python setup.py test build sdist bdist
+
+deploy:
+  provider: pypi
+  user: $pypi_user
+  password: $pypi_password
+  on:
+    tags: true
