@@ -1,7 +1,7 @@
 README
 ======
 
-***GCG*** stands for *Git Changelog Generator*.
+**GCG** stands for *Git Changelog Generator*.
 
 To see available options, run as:
 
