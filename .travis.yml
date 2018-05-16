@@ -1,8 +1,9 @@
 language: python
-script: pytest
 install: pip install -r requirements_setup.txt -r requirements_test.txt
-test:
+script:
   - python setup.py test build sdist bdist
+test:
+  - pytest
 
 deploy:
   provider: pypi
