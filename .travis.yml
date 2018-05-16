@@ -1,13 +1,15 @@
 language: python
-script: pytest
 install: pip install -r requirements_setup.txt -r requirements_test.txt
+script:
+- python setup.py test build sdist bdist
 test:
-  - python setup.py test build sdist bdist
-
+- pytest
 deploy:
   provider: pypi
-  user: $pypi_user
-  password: $pypi_password
-  distributions: "sdist bdist_wheel"
+  user: weakcamel
+  password:
+    secure: vHCgG+odxid35QXe0Jl0FWB3Nf7HAsGaDyYaXWt3HafeUH23f3jgPFxq+ZsyB/oYuX91IxTm7UsImGJ7GN7ePpTz7pKEWiH5QSgJHEkB1oCcCK9a6Rk0fjpOkWx/eie8KnEmH+wtW+pPZVn4DWJ4w1B845Smn4sOQSd8+xvWHO2ijdH5WmnDGQSqLqGak64XtlQzvIvV8HejpPNMX+c4Ol7k/ArFxf4VbVTIY2fh2IIAcujT7s3TnGOHqYY+/tbJCcG3jCUPoF5lsn3nhiqXoJhBHWoa+kLxBa8rU2JoPfD/X4i0P9mLxux+G5KxrdfDAdZc67dRdCPHE8Uf4bzaH+IeVedd0JldfD/fX8yqdfvZTy3CYLAO5HDmgZHVLyQrjemlQFbjk/eRPAvPxttENZfqDHmb8O1rNfzA5FApO5+aXsw+QJs21xsaaQcERdOqnwc6f8h9iXsjxucHNX5meD+VprgNhJaz1VUgzlmivSclRQzUwzQv9gvXXCgnBey52MkqnIX+XCnYjHyrsgu3QXlhN83lQWGJ6FdHQo1yk+37sd7ILH/73Jc2wTSslkQaSd5iU7DQVDoM+F+wFDgfK2/N8Rmfuh3WCn4kzvFti9m4T3hKJxGYaMll0raoqqftx2NfptdCC9K0IZafc3caCSSgjiMg5ieAOyZkhKkBLnA=
   on:
     tags: true
+    distributions: sdist bdist_wheel
+    repo: nokia/git-changelog-generator
