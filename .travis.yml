@@ -1,13 +1,17 @@
 language: python
-script: pytest
 install: pip install -r requirements_setup.txt -r requirements_test.txt
+script:
+- python setup.py test build sdist bdist
 test:
-  - python setup.py test build sdist bdist
-
+- pytest
 deploy:
   provider: pypi
-  user: $pypi_user
-  password: $pypi_password
-  distributions: "sdist bdist_wheel"
+  user: "$pypi_user"
+  password:
+    secure: "$pypi_password"
+  distributions: sdist bdist_wheel
   on:
     tags: true
+env:
+  global:
+    secure: oPslQj7EBtFmO7glxXRz515Y42RQsrcQ1XOqdAx4LMSmD87HYPSpY42UmdOAZRuLwDWCbHzitAnGdG9thM+rSHZVkXYJ0B2A+wsAJuA9K9fLpE5GtZ3pArwDAgyGFvEm0UEWEKsX9Xrb/NgdHfQ/DsCsOVeFYXxG7IEHil2Kg/fsuFFe/+jS1QN/I+5WV8WhYjRIkQrDkjxM+QMJb0vO7QMz09VYAC7SnfRUAdgRpT5WQFjs/BVSdQVMw7xzmQx1eFjywmD9+xHuXwd1ojAUBr8YDXYIJJY2XgRYBuIM3s+r+ZlnobKPkdm5esJIIsHlybWjxGVoklGfFMl/Eiqa250ZQN/kVJ/YxGHmMoZfkxp6TgIrX+lZQOu/p9StkG1/iPsSBvwK+GxTbOwhXuQw5mFty7rTKHzfIDlTSB9HnGh91KuZU9VSXrLgL/89dO6a6K7O+wSEeULvbSnHgQKhFFPC6APGcWjarpExWUGi/cXDDurfamwy5+P3huJZY4/GD/dPb3qMQIKXfBPNCSfY+84OcbxIUu751WSkYOo5fAl53QMgDo1c1iNV8dDW9S8bKpAL+4kEIlzMhh5o+6mBbzj/Tmw73cULtsyug3FWSuoTj66AGUYffRnDSSs0jKsMxUDkoDkyZxpKsYHCnfxeqx4MBv+aNUMG3ePqhPOsfVE=
