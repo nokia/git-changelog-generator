@@ -381,7 +381,7 @@ def repo_iterate(repo, high, low=None):
     :return: a git.Commit object
     """
 
-    refs = high if low is None else "{}..{}".format(high, low)
+    refs = high if low is None else "{}..{}".format(low, high)
 
     for commit in repo.iter_commits(refs):
         yield commit

@@ -74,6 +74,36 @@ class TestMain(object):
         assert lines[2].startswith('- And then a second commit')
         assert lines[3].startswith('- Initial commit')
 
+    def test_main_rpm_since_until(self):
+        """
+        Generate a changelog from a well known and defined repository
+        which we control ourselves.
+
+        Use the --since and --until flag
+        """
+
+        input_messages = [
+            "Initial commit",
+            "And then a second commit",
+            "ISSUE-1 And a third commit\nThis time with a Jira ticket",
+        ]
+
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages=input_messages)
+        assert not repo.bare
+        assert not client.tag()
+
+        out_file = os.path.join(self.tmp_dir, 'outfile')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'rpm', '-o', out_file,
+            '-s', 'HEAD^^', '-u', 'HEAD^'])
+        assert os.path.exists(out_file)
+
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        assert lines[0].endswith(
+            '{} <{}> - current'.format(AUTHOR.name, AUTHOR.email))
+        assert lines[1].startswith("- And then a second commit")
+
     def test_main_deb_fakerepo(self):
         """
         Generate a changelog from a well known and defined repository
