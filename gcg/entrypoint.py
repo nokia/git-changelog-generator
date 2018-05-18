@@ -43,9 +43,7 @@ def parse_args(argv):
         description="Generate changelogs out of Git history.",
         epilog="""
         FIXME: timezone manipulations
-        FIXME: potential time conflicts (merging in old changes
-        to a new release).
-        TODO: better test coverage
+        FIXME: chronologically unordered releases cause issues
         """
     )
     parser.add_argument(

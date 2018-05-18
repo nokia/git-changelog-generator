@@ -7,9 +7,54 @@ To see available options, run as:
 
 .. code:: bash
 
-    $ gcg.py --help
+    $ gcg --help
 
-TODO: Not much to see here.. yet. Improve the README.
+Rationale
+---------
+
+Keeping a reasonable changelog is an invaluable asset for everyone who tries
+to track progress of a project or figure out whether their issue
+has or has not be fixed.
+
+In Linux world, such changelogs are often embedded into packages, for
+example RPM has an optional section in the *spec* file (``%changelog``)
+and Debian versioning goes even further - it explicitly **depends**
+on a proper version information inside the changelog to build
+and maintain the package(s).
+
+There are good reasons why the log is ideally maintained manually,
+you can read all about it at https://keepachangelog.com/en/
+
+That said, it's not all black and white. A couple of questions:
+
+- what if you spend a lot of work making sure your commit descriptions
+  are telling the story; should this work be disregarded and repeated
+  in the changelog?
+- what if the reality kicks in, project members keep forgetting to update
+  the changelog (or it is "yet another menial task")?
+- what if you need to maintain the log in multiple formats?
+
+If advice from keepchangelog.com doesn't address your questions,
+you don't want to tie yourself to a specific Git manager (like  Github,
+Gitlab, Bitbucket) and as a project you're committed to maintain sensible
+Git commit descriptions - gcg might be just the fit for you.
+
+Releases
+========
+
+At this point, *gcg* official packages are created and maintained only for
+Python; they're available via PyPI index: https://pypi.org/project/gcg
+
+.. tip::
+
+    See also: https://packaging.python.org/tutorials/installing-packages/
+
+That said, unofficial packages for most common distribution formats can
+be obtained from the following repositories:
+
+* RPM: https://bintray.com/weakcamel/yum-oss
+* DEB: https://bintray.com/weakcamel/deb-oss
+
 
 Build
 =====
