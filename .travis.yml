@@ -1,15 +1,56 @@
-language: python
-install: pip install -r requirements_setup.txt -r requirements_test.txt
+language: bash
+sudo: required
+dist: xenial
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y "rpm" "debhelper" python-all fakeroot python-setuptools jq
+
+install:
+- virtualenv venv
+- . venv/bin/activate
+- pip install -r requirements_setup.txt -r requirements_test.txt
+
 script:
-- python setup.py test build sdist bdist
-test:
-- pytest
+- . venv/bin/activate
+- python setup.py test build sdist bdist_wheel
+- python setup.py --command-packages=stdeb.command bdist_deb
+- python setup.py bdist_rpm
+# TODO: work with jq to merge both json files and use one publishing provider
+- >
+    for f in resources/bintray/*-spec.json; do
+      jq --arg release_date $(date "+%Y-%M-%d") \
+         --arg version $(< version.txt) \
+        '.version.vcs_tag=$version | .version.name=$version | .version.released=$release_date' $f > "dist/${f##**/}"
+    done
+
+before_deploy:
+- ls -al; pwd; find . -ls
+- cat dist/*-spec.json 
+
 deploy:
-  provider: pypi
-  user: weakcamel
-  password:
-    secure: vHCgG+odxid35QXe0Jl0FWB3Nf7HAsGaDyYaXWt3HafeUH23f3jgPFxq+ZsyB/oYuX91IxTm7UsImGJ7GN7ePpTz7pKEWiH5QSgJHEkB1oCcCK9a6Rk0fjpOkWx/eie8KnEmH+wtW+pPZVn4DWJ4w1B845Smn4sOQSd8+xvWHO2ijdH5WmnDGQSqLqGak64XtlQzvIvV8HejpPNMX+c4Ol7k/ArFxf4VbVTIY2fh2IIAcujT7s3TnGOHqYY+/tbJCcG3jCUPoF5lsn3nhiqXoJhBHWoa+kLxBa8rU2JoPfD/X4i0P9mLxux+G5KxrdfDAdZc67dRdCPHE8Uf4bzaH+IeVedd0JldfD/fX8yqdfvZTy3CYLAO5HDmgZHVLyQrjemlQFbjk/eRPAvPxttENZfqDHmb8O1rNfzA5FApO5+aXsw+QJs21xsaaQcERdOqnwc6f8h9iXsjxucHNX5meD+VprgNhJaz1VUgzlmivSclRQzUwzQv9gvXXCgnBey52MkqnIX+XCnYjHyrsgu3QXlhN83lQWGJ6FdHQo1yk+37sd7ILH/73Jc2wTSslkQaSd5iU7DQVDoM+F+wFDgfK2/N8Rmfuh3WCn4kzvFti9m4T3hKJxGYaMll0raoqqftx2NfptdCC9K0IZafc3caCSSgjiMg5ieAOyZkhKkBLnA=
-  on:
-    tags: true
+  - provider: pypi
+    skip_cleanup: true
+    user: weakcamel
+    password:
+      secure: vHCgG+odxid35QXe0Jl0FWB3Nf7HAsGaDyYaXWt3HafeUH23f3jgPFxq+ZsyB/oYuX91IxTm7UsImGJ7GN7ePpTz7pKEWiH5QSgJHEkB1oCcCK9a6Rk0fjpOkWx/eie8KnEmH+wtW+pPZVn4DWJ4w1B845Smn4sOQSd8+xvWHO2ijdH5WmnDGQSqLqGak64XtlQzvIvV8HejpPNMX+c4Ol7k/ArFxf4VbVTIY2fh2IIAcujT7s3TnGOHqYY+/tbJCcG3jCUPoF5lsn3nhiqXoJhBHWoa+kLxBa8rU2JoPfD/X4i0P9mLxux+G5KxrdfDAdZc67dRdCPHE8Uf4bzaH+IeVedd0JldfD/fX8yqdfvZTy3CYLAO5HDmgZHVLyQrjemlQFbjk/eRPAvPxttENZfqDHmb8O1rNfzA5FApO5+aXsw+QJs21xsaaQcERdOqnwc6f8h9iXsjxucHNX5meD+VprgNhJaz1VUgzlmivSclRQzUwzQv9gvXXCgnBey52MkqnIX+XCnYjHyrsgu3QXlhN83lQWGJ6FdHQo1yk+37sd7ILH/73Jc2wTSslkQaSd5iU7DQVDoM+F+wFDgfK2/N8Rmfuh3WCn4kzvFti9m4T3hKJxGYaMll0raoqqftx2NfptdCC9K0IZafc3caCSSgjiMg5ieAOyZkhKkBLnA=
+    on:
+      tags: true
+      repo: nokia/git-changelog-generator
     distributions: sdist bdist_wheel
-    repo: nokia/git-changelog-generator
+  - provider: bintray
+    skip_cleanup: true
+    file: dist/rpm-spec.json
+    user: weakcamel
+    key:
+      secure: rsvtEDpPvLW9awVO3DZIz7UZhNNFSRkx/w9p+tFUnbmoPgB+7JI821PjrQ9DvauVhUmfiov23vX0Dbc3jrc1MpnjPg0yB0ZkS/DqsT641T7Tif8/Js3voNPZQxj4X7bCFoYo2TuKTidE9MP/ypNemGHpTmGlam449O7KwGJId0GHQbhcG7/X5XAtwyPHae2JjJCBlsX3uCuz6R2DwGAeny6Z5xPIZh0UAdqv/mtse4zDoV13SwlfV5q+HRecKlQK3OvwoqSRF4ETBMh4UUaMa/HPwkECYmoLiOrpPgwY2BUUkuUXUCdgjyWevRkuCV271NyK0e28cDRqvXrs2Ds5G0bpV11mhIwcZMe/WgAcdQRfexQ3jFJJvQqVMI5WrhlYJKWLGLKYP7wMP/7LiSPMaudpJDHC+ilUk+m1DUHe8YAT/1BIbUATOybQE/TXUDi8uBdLQXPwq5yE0rpCFADIvUSxvyuidHJ4oOTmqr6h4pBXSPeXUj9Hd5ZgtfsMXEitzslU6/hTzQt340bCrwnODoX72nCqTAV0yW8lU5TLC3HVQnqlwO+YmPlYGhDTJnjyOqmpGHAvXlI8aTqgGjbnyCi4aao1Qb40pOU0SzWM+XG6GUXWUk1ImXKo3Jgv1m3xgHVDLVD3KxZKtgruRaSVw4+r4tTA7kXxNicCt5i84+8=
+    on:
+      branch: bintray_deployment
+  - provider: bintray
+    skip_cleanup: true
+    file: dist/deb-spec.json
+    user: weakcamel
+    key:
+      secure: rsvtEDpPvLW9awVO3DZIz7UZhNNFSRkx/w9p+tFUnbmoPgB+7JI821PjrQ9DvauVhUmfiov23vX0Dbc3jrc1MpnjPg0yB0ZkS/DqsT641T7Tif8/Js3voNPZQxj4X7bCFoYo2TuKTidE9MP/ypNemGHpTmGlam449O7KwGJId0GHQbhcG7/X5XAtwyPHae2JjJCBlsX3uCuz6R2DwGAeny6Z5xPIZh0UAdqv/mtse4zDoV13SwlfV5q+HRecKlQK3OvwoqSRF4ETBMh4UUaMa/HPwkECYmoLiOrpPgwY2BUUkuUXUCdgjyWevRkuCV271NyK0e28cDRqvXrs2Ds5G0bpV11mhIwcZMe/WgAcdQRfexQ3jFJJvQqVMI5WrhlYJKWLGLKYP7wMP/7LiSPMaudpJDHC+ilUk+m1DUHe8YAT/1BIbUATOybQE/TXUDi8uBdLQXPwq5yE0rpCFADIvUSxvyuidHJ4oOTmqr6h4pBXSPeXUj9Hd5ZgtfsMXEitzslU6/hTzQt340bCrwnODoX72nCqTAV0yW8lU5TLC3HVQnqlwO+YmPlYGhDTJnjyOqmpGHAvXlI8aTqgGjbnyCi4aao1Qb40pOU0SzWM+XG6GUXWUk1ImXKo3Jgv1m3xgHVDLVD3KxZKtgruRaSVw4+r4tTA7kXxNicCt5i84+8=
+    on:
+      branch: bintray_deployment
