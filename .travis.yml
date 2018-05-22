@@ -1,51 +1,52 @@
+---
 language: bash
 sudo: required
 dist: xenial
+
 before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y "rpm" "debhelper" python-all fakeroot python-setuptools
   jq
+
 install:
 - virtualenv venv
 - ". venv/bin/activate"
 - pip install -r requirements_setup.txt -r requirements_test.txt
+
 script:
 - ". venv/bin/activate"
-- python setup.py test build sdist bdist_wheel
+- python setup.py test build sdist bdist_wheel bdist bdist_rpm
 - python setup.py --command-packages=stdeb.command bdist_deb
-- python setup.py bdist_rpm
-- |
-  for f in resources/bintray/rpm-spec.json; do
-    jq --arg release_date $(date "+%Y-%M-%d") \
-       --arg version $(< version.txt) \
-      '.version.vcs_tag=$version | .version.name=$version | .version.released=$release_date' $f > "dist/${f##**/}"
-  done
+
 before_deploy:
-- ls -al; pwd; find dist -ls; cat dist/*-spec.json
+- ls -al; pwd; find dist deb_dist -ls
+- VERSION=$(<version.txt)
+- >
+    if [[ "${TRAVIS_TAG}" != "${VERSION}" ]]; then
+        >&2 echo "ERROR: your version.txt and the Git tag don't match"
+        false
+    fi
+
+
 deploy:
-- provider: pypi
+- provider: script
   skip_cleanup: true
-  user: weakcamel
-  password: $PYPI_PASS
+  script: twine upload -u "${PYPI_USER}" -p "${PYPI_PASS}" -r "${PYPI_URL}" "dist/gcg-${VERSION}.tar.gz" "dist-${VERSION}"-*.whl
   on:
     tags: true
     repo: nokia/git-changelog-generator
-  distributions: sdist bdist_wheel
-- provider: bintray
-  skip_cleanup: true
-  file: dist/rpm-spec.json
-  user: weakcamel
-  key: $BINTRAY_KEY
-  on:
-    branch: bintray_deployment
 - provider: script
   skip_cleanup: true
-  script: bash resources/bintray/deploy_deb.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  script: bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
   on:
-    branch: bintray_deployment
+    tags: true
+    repo: nokia/git-changelog-generator
+
 env:
   global:
   - BINTRAY_USER=weakcamel
+  - PYPI_USER=weakcamel
+  - PYPI_URL=https://pypi.org
   # BINTRAY_KEY
   - secure: TWZFc2T8P48U4kdk2jksos4tCoN0nHSY2sac6YicyX0EAAKl1ZpLcl0Q126Z5WLXYvXTgooqRq7DK8unIaTsttBVqzYQf2UkfOeGS04ORAIp6ohRfbPmTLjccsbkb6zVjYHRnrwyA3HtsegXQAIpjRqDSGLvAycTRvl2HO0Yci52ZlY0ONGlmIdyG3k5EGiPaQ0tP30MVhZdhyvH/UVywGu6tSlI6X5z9Cw/O/pnNWOb+1uUTxQTEM5vsdhJk5JiMl1IUIkijPYkxPEalLWR9VdpciwfGucWFqxHZaAh9xslhn9Sc2mZiG0pFITlbJ9qoT5JIGRcxjpZfvlV9c1dFErzTeaZm7BjN71vU36iP0aopUVZI7mQNDeTywFAbfRU3mnlfPmuia6aEZB1cQdr38DrsCa4kmWzRh44id3J3Y3KMcuoUNQsudVQs0mx0PfRYrfcXB42irl1tuBFK8Is89Gaajka1eUN2YbveoAp4pKnBv9CJ2fUdXJMkJHOSuq7HUPmdS+OVUXQA3XOuSVS1Bhkt4xJCpqDTMV4JUVitglmSNtqrHSNFJCqyNwvEK0ZN4dYwMEAWNYc38qT6z0Ydtf0Aix3+4FERoSakfVccvb/PhIHHivxxx1ODS3soq12N8wrBs2dTGbTnZugrXZ2DPYpfdDUsxAlDGoB5rplZ8Y=
   # PYPI_PASS
