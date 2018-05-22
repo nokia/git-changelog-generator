@@ -8,7 +8,7 @@ set -x
 # 
 
 function usage {
-    echo "Usage: ${0##*/} <USER> <PASSWORD> <VERSION>"
+    echo "Usage: ${0##*/} <USER> <PASSWORD> <VERSION> [COMPONENT]"
 }
 
 if [[ $# -lt 3 ]]; then
