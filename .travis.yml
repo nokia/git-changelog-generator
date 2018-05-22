@@ -1,27 +1,33 @@
+---
 language: bash
 sudo: required
 dist: xenial
+
 before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y "rpm" "debhelper" python-all fakeroot python-setuptools
   jq
+
 install:
 - virtualenv venv
 - ". venv/bin/activate"
 - pip install -r requirements_setup.txt -r requirements_test.txt
+
 script:
 - ". venv/bin/activate"
 - python setup.py test build sdist bdist_wheel
 - python setup.py --command-packages=stdeb.command bdist_deb
 - python setup.py bdist_rpm
-- |
-  for f in resources/bintray/rpm-spec.json; do
-    jq --arg release_date $(date "+%Y-%M-%d") \
-       --arg version $(< version.txt) \
-      '.version.vcs_tag=$version | .version.name=$version | .version.released=$release_date' $f > "dist/${f##**/}"
-  done
+
 before_deploy:
-- ls -al; pwd; find dist -ls; cat dist/*-spec.json
+- ls -al; pwd; find dist deb_dist -ls
+- >
+    if [[ ${TRAVIS_TAG} != $(< version.txt ]]; then
+        >&2 echo "ERROR: your version.txt and the Git tag don't match"
+        false
+    fi
+
+
 deploy:
 - provider: pypi
   skip_cleanup: true
@@ -31,18 +37,13 @@ deploy:
     tags: true
     repo: nokia/git-changelog-generator
   distributions: sdist bdist_wheel
-- provider: bintray
-  skip_cleanup: true
-  file: dist/rpm-spec.json
-  user: weakcamel
-  key: $BINTRAY_KEY
-  on:
-    branch: bintray_deployment
 - provider: script
   skip_cleanup: true
-  script: bash resources/bintray/deploy_deb.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  script: bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
   on:
-    branch: bintray_deployment
+    tags: true
+    repo: nokia/git-changelog-generator
+
 env:
   global:
   - BINTRAY_USER=weakcamel
