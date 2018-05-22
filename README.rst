@@ -55,6 +55,16 @@ be obtained from the following repositories:
 * RPM: https://bintray.com/weakcamel/yum-oss
 * DEB: https://bintray.com/weakcamel/deb-oss
 
+To use the DEB packages from those repositories, you need to install
+the Bintray GPG keys; otherwise your `apt-get update` will fail.
+
+
+```
+curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
+curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=weakcamel | sudo apt-key add -
+```
+
+
 
 Build
 =====
