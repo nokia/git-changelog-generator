@@ -1,15 +1,63 @@
-language: python
-install: pip install -r requirements_setup.txt -r requirements_test.txt
+---
+language: bash
+sudo: required
+dist: xenial
+
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y "rpm" "debhelper" python-all fakeroot python-setuptools
+  jq
+
+install:
+- virtualenv venv
+- . venv/bin/activate
+- pip install -r requirements_setup.txt -r requirements_test.txt
+
 script:
-- python setup.py test build sdist bdist
-test:
-- pytest
+- . venv/bin/activate
+- python setup.py test build sdist bdist_wheel bdist bdist_rpm
+- python setup.py --command-packages=stdeb.command bdist_deb
+
+before_deploy:
+- ls -al; pwd; find dist deb_dist -ls
+- VERSION=$(<version.txt)
+- if [[ -z "$TRAVIS_TAG" ]]; then VERSION+=".dev${TRAVIS_BUILD_NUMBER}"; done
+- export VERSION
+- >
+    if [[ -n "$TRAVIS_TAG" ]] && [[ "${TRAVIS_TAG}" != "${VERSION}" ]]; then
+        >&2 echo "ERROR: your version.txt and the Git tag don't match"
+        >&2 echo "Tip: Don't tag if you want to deploy only to test.pypi.org"
+        false
+    fi
+- cp -v pypirc ~/.pypirc && cat ~/.pypirc
+
+
 deploy:
-  provider: pypi
-  user: weakcamel
-  password:
-    secure: vHCgG+odxid35QXe0Jl0FWB3Nf7HAsGaDyYaXWt3HafeUH23f3jgPFxq+ZsyB/oYuX91IxTm7UsImGJ7GN7ePpTz7pKEWiH5QSgJHEkB1oCcCK9a6Rk0fjpOkWx/eie8KnEmH+wtW+pPZVn4DWJ4w1B845Smn4sOQSd8+xvWHO2ijdH5WmnDGQSqLqGak64XtlQzvIvV8HejpPNMX+c4Ol7k/ArFxf4VbVTIY2fh2IIAcujT7s3TnGOHqYY+/tbJCcG3jCUPoF5lsn3nhiqXoJhBHWoa+kLxBa8rU2JoPfD/X4i0P9mLxux+G5KxrdfDAdZc67dRdCPHE8Uf4bzaH+IeVedd0JldfD/fX8yqdfvZTy3CYLAO5HDmgZHVLyQrjemlQFbjk/eRPAvPxttENZfqDHmb8O1rNfzA5FApO5+aXsw+QJs21xsaaQcERdOqnwc6f8h9iXsjxucHNX5meD+VprgNhJaz1VUgzlmivSclRQzUwzQv9gvXXCgnBey52MkqnIX+XCnYjHyrsgu3QXlhN83lQWGJ6FdHQo1yk+37sd7ILH/73Jc2wTSslkQaSd5iU7DQVDoM+F+wFDgfK2/N8Rmfuh3WCn4kzvFti9m4T3hKJxGYaMll0raoqqftx2NfptdCC9K0IZafc3caCSSgjiMg5ieAOyZkhKkBLnA=
+- provider: script
+  skip_cleanup: true
+  script: twine upload -p "${PYPI_PASS}" -r pypi "dist/gcg-${VERSION}.tar.gz" "dist/gcg-${VERSION}"-*.whl
   on:
     tags: true
-    distributions: sdist bdist_wheel
     repo: nokia/git-changelog-generator
+- provider: script
+  skip_cleanup: true
+  script: twine upload -p "${PYPI_PASS}" -r testpypi "dist/gcg-${VERSION}.tar.gz" "dist/gcg-${VERSION}"-*.whl
+  on:
+    tags: false
+    all_branches: true
+    repo: nokia/git-changelog-generator
+- provider: script
+  skip_cleanup: true
+  script: bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  on:
+    tags: true
+    repo: nokia/git-changelog-generator
+
+env:
+  global:
+  - BINTRAY_USER=weakcamel
+  - PYPI_USER=weakcamel
+  # BINTRAY_KEY
+  - secure: TWZFc2T8P48U4kdk2jksos4tCoN0nHSY2sac6YicyX0EAAKl1ZpLcl0Q126Z5WLXYvXTgooqRq7DK8unIaTsttBVqzYQf2UkfOeGS04ORAIp6ohRfbPmTLjccsbkb6zVjYHRnrwyA3HtsegXQAIpjRqDSGLvAycTRvl2HO0Yci52ZlY0ONGlmIdyG3k5EGiPaQ0tP30MVhZdhyvH/UVywGu6tSlI6X5z9Cw/O/pnNWOb+1uUTxQTEM5vsdhJk5JiMl1IUIkijPYkxPEalLWR9VdpciwfGucWFqxHZaAh9xslhn9Sc2mZiG0pFITlbJ9qoT5JIGRcxjpZfvlV9c1dFErzTeaZm7BjN71vU36iP0aopUVZI7mQNDeTywFAbfRU3mnlfPmuia6aEZB1cQdr38DrsCa4kmWzRh44id3J3Y3KMcuoUNQsudVQs0mx0PfRYrfcXB42irl1tuBFK8Is89Gaajka1eUN2YbveoAp4pKnBv9CJ2fUdXJMkJHOSuq7HUPmdS+OVUXQA3XOuSVS1Bhkt4xJCpqDTMV4JUVitglmSNtqrHSNFJCqyNwvEK0ZN4dYwMEAWNYc38qT6z0Ydtf0Aix3+4FERoSakfVccvb/PhIHHivxxx1ODS3soq12N8wrBs2dTGbTnZugrXZ2DPYpfdDUsxAlDGoB5rplZ8Y=
+  # PYPI_PASS
+  - secure: VBtSEaK399NxRj3hBhLM11SSsz+orMYe9F4AMw2LTUq548et0+4pMcv+DewNaihye43jtZYBA09ZZMREFTLBgN74Nu+vf/RAwBNHkUAZOAIwKk6MrqaLwjXkoB6n/5fKX9/5VweztJHpVY4zppmz+P2AFa8XDpLyYZQ553P1Mm60Sl/W+mpTs5/L0yVv+Rpe2ATww679CuLQvvwMEc9HS4cmCH38IaMa9z3J5BiXVHAbzJndiUGvFABcewgHNgYAI2z5xOwzIkr7YsgAb/3bXrGp4DXhf2436NZIqu7bi6VJMIRDkgh5eFwJ8bLpMXQxO6G90o48E2otbapu6OUTsODSMYKbVtWJmK8y29GSnLcAuIrimuYFBQ/n8sFWykpRkNgfvMtpxYGl+QD14/2aKtCmayjLeoqC/0+dZmKGZJPSzq1nGN4mrPsbXj2EWrepb9xX8JRf15Rx3OeugfrtTA+2qiqpAEPXyrAouWBEitCjTtIwAdnzcOA4qQGFq2OjGxQvZBjuYUFxj/L8JH1vWROZw9d5r3zhiT30SxvSB25MwLKIZ4E0yXrHq2vxLIgMa1K8gIpv9V/7A7kR8piQWVIgplrurrg3PBydCNlOMZwL99HHiebvFBN+EdYX/if2a/oScHwMCaOPeBUlwZ1mz3alLgqf/PJAQkphVJxnNVU=

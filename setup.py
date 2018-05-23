@@ -34,11 +34,25 @@ def read_list(fname):
     return retval
 
 
+def get_version(fname):
+    """Retrieve version. Obtain it from VERSION environment variable
+    or fallback to the specified file
+
+    :param fname: file containing only the version
+    :return:  version as the string
+             with end of lines characters stripped off
+    """
+    retval = None
+    if 'VERSION' in os.environ:
+        retval = os.environ['VERSION']
+    return retval or read(fname).strip()
+
+
 logging.basicConfig(level=logging.INFO)
 
 setup(
     name='gcg',
-    version=read('version.txt').strip(),
+    version=get_version('version.txt'),
     packages=['gcg', 'tests'],
     url='https://github.com/nokia/git-changelog-generator',
     license='BSD-3-Clause',

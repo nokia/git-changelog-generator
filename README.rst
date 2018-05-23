@@ -42,18 +42,40 @@ Git commit descriptions - gcg might be just the fit for you.
 Releases
 ========
 
+
 At this point, *gcg* official packages are created and maintained only for
 Python; they're available via PyPI index: https://pypi.org/project/gcg
-
-.. tip::
-
-    See also: https://packaging.python.org/tutorials/installing-packages/
 
 That said, unofficial packages for most common distribution formats can
 be obtained from the following repositories:
 
 * RPM: https://bintray.com/weakcamel/yum-oss
 * DEB: https://bintray.com/weakcamel/deb-oss
+
+To use the DEB packages from those repositories, you need to install
+the Bintray GPG keys; otherwise your `apt-get update` will fail.
+
+PIP
+---
+
+Only tagged packages are uploaded to https://pypi.org index,
+test versions will be made available under
+https://test.pypi.org/manage/project/gcg/releases/
+
+Best to ensure the [version](version.txt) is unique for each CI build you'd
+like to pull down for testing.
+
+.. tip::
+
+    See also: https://packaging.python.org/tutorials/installing-packages/
+
+
+
+```
+curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
+curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=weakcamel | sudo apt-key add -
+```
+
 
 
 Build
