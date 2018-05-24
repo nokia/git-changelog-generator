@@ -19,5 +19,5 @@ API_KEY=${2:-SILLYPASS}
 SUBJECT=${3:-weakcamel}
 REPO=${4:-deb-oss}
 
-curl -X POST -u "${USER}:${API_KEY}" "https://api.bintray.com/calc_metadata/${SUBJECT}/${REPO}"
+curl --fail -X POST -u "${USER}:${API_KEY}" "https://api.bintray.com/calc_metadata/${SUBJECT}/${REPO}"
 
