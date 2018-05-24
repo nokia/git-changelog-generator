@@ -3,11 +3,6 @@ README
 
 **GCG** stands for *Git Changelog Generator*.
 
-To see available options, run as:
-
-.. code:: bash
-
-    $ gcg --help
 
 Rationale
 ---------
@@ -53,7 +48,16 @@ be obtained from the following repositories:
 * DEB: https://bintray.com/weakcamel/deb-oss
 
 To use the DEB packages from those repositories, you need to install
-the Bintray GPG keys; otherwise your `apt-get update` will fail.
+the [Bintray GPG key](https://bintray.com/user/downloadSubjectPublicKey?username=weakcamel);
+otherwise your `apt-get update` will fail.
+
+For example::
+
+    # either of:
+    curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
+
+    curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=weakcamel | sudo apt-key add -
+
 
 PIP
 ---
@@ -62,8 +66,9 @@ Only tagged packages are uploaded to https://pypi.org index,
 test versions will be made available under
 https://test.pypi.org/manage/project/gcg/releases/
 
-Best to ensure the [version](version.txt) is unique for each CI build you'd
-like to pull down for testing.
+TravisCI builds try to ensure the version (``version.txt``) is unique for
+each CI build by adding ``.dev<TRAVIS_BUILD_NUMBER>`` suffix
+for development versions of the package.
 
 .. tip::
 
@@ -71,10 +76,6 @@ like to pull down for testing.
 
 
 
-```
-curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=bintray | sudo apt-key add -
-curl -qL https://bintray.com/user/downloadSubjectPublicKey?username=weakcamel | sudo apt-key add -
-```
 
 
 
@@ -126,6 +127,17 @@ DEB:
 .. code:: bash
 
     python setup.py --command-packages=stdeb.command bdist_deb
+
+
+Usage
+=====
+
+
+To see available options, run as:
+
+.. code:: bash
+
+    $ gcg --help
 
 Existing templates
 ------------------
