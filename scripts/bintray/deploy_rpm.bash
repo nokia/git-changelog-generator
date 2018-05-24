@@ -31,7 +31,7 @@ btparams=(
 )
 
 for f in dist/*.rpm; do
-  curl -T "$f" -u"${USER}:${PASSWORD}" "${btparams[@]}" \
+  curl --fail -T "$f" -u"${USER}:${PASSWORD}" "${btparams[@]}" \
     "${API_URL}/content/${USER}/yum-oss/stable/${f##*/}"
   # PUT /content/:subject/:repo/:file_path
 done
