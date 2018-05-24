@@ -17,7 +17,7 @@ fi
 USER=${1:-INVALID}
 API_KEY=${2:-SILLYPASS}
 SUBJECT=${3:-weakcamel}
-REPO=${3:-deb-oss}
+REPO=${4:-deb-oss}
 
 curl -X POST -u "${USER}:${API_KEY}" "https://api.bintray.com/calc_metadata/${SUBJECT}/${REPO}"
 
