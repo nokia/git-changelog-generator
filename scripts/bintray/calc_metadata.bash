@@ -4,11 +4,11 @@ function usage {
     cat - <<EOF
 Usage:
 
-    ${0##*/} USER API_KEY [ <USER|ORGANIZATION> [REPO_NAME]]
+    ${0##*/} USER API_KEY REPO_NAME[/PATH] 
 EOF
 }
 
-if [[ $# -lt 2 ]]; then
+if [[ $# -lt 3 ]]; then
     >&2 echo "ERROR: insufficient number of input parameters"
     usage
     false
@@ -16,8 +16,7 @@ fi
 
 USER=${1:-INVALID}
 API_KEY=${2:-SILLYPASS}
-SUBJECT=${3:-weakcamel}
-REPO=${3:-deb-oss}
+REPO=${3:-}
 
-curl -X POST -u "${USER}:${API_KEY}" "https://api.bintray.com/calc_metadata/${SUBJECT}/${REPO}"
+curl --fail -X POST -u "${USER}:${API_KEY}" "https://api.bintray.com/calc_metadata/${USER}/${REPO}"
 

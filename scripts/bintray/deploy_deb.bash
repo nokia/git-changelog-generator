@@ -33,12 +33,12 @@ btparams=(
     -H "X-Bintray-Override: 0"
     -H "X-Bintray-Publish: 1"
     -H "X-Bintray-Debian-Distribution: xenial"
-    -H "X-Bintray-Debian-Component: main"
+    -H "X-Bintray-Debian-Component: ${COMPONENT}"
     -H "X-Bintray-Debian-Architecture: all"
 )
 
 for f in deb_dist/*.deb; do
-  curl -T "$f" -u"${USER}:${PASSWORD}" "${btparams[@]}" \
+  curl --fail -T "$f" -u"${USER}:${PASSWORD}" "${btparams[@]}" \
     "${API_URL}/content/${USER}/deb-oss/pool/p/python-gcg/${f##*/}"
   # PUT /content/:subject/:repo/:file_path
 done

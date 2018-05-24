@@ -17,8 +17,10 @@ install:
 script:
 - . venv/bin/activate
 # Tag trumps the version; then missing, version from file is taken instead
-- export VERSION=${TRAVIS_TAG:-$(<version.txt).dev${TRAVIS_BUILD_NUMBER}}
-- python setup.py test build sdist bdist_wheel bdist bdist_rpm
+- export VERSION=${TRAVIS_TAG:-$(<version.txt)dev${TRAVIS_BUILD_NUMBER}}
+- python setup.py test build sdist bdist_wheel bdist
+- ls -al dist/
+- rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
 - python setup.py --command-packages=stdeb.command bdist_deb
 
 before_deploy:
@@ -48,7 +50,7 @@ deploy:
     repo: nokia/git-changelog-generator
 - provider: script
   skip_cleanup: true
-  script: bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  script: DEBUG=1 bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
   on:
     tags: true
     repo: nokia/git-changelog-generator
@@ -61,4 +63,3 @@ env:
   - secure: TWZFc2T8P48U4kdk2jksos4tCoN0nHSY2sac6YicyX0EAAKl1ZpLcl0Q126Z5WLXYvXTgooqRq7DK8unIaTsttBVqzYQf2UkfOeGS04ORAIp6ohRfbPmTLjccsbkb6zVjYHRnrwyA3HtsegXQAIpjRqDSGLvAycTRvl2HO0Yci52ZlY0ONGlmIdyG3k5EGiPaQ0tP30MVhZdhyvH/UVywGu6tSlI6X5z9Cw/O/pnNWOb+1uUTxQTEM5vsdhJk5JiMl1IUIkijPYkxPEalLWR9VdpciwfGucWFqxHZaAh9xslhn9Sc2mZiG0pFITlbJ9qoT5JIGRcxjpZfvlV9c1dFErzTeaZm7BjN71vU36iP0aopUVZI7mQNDeTywFAbfRU3mnlfPmuia6aEZB1cQdr38DrsCa4kmWzRh44id3J3Y3KMcuoUNQsudVQs0mx0PfRYrfcXB42irl1tuBFK8Is89Gaajka1eUN2YbveoAp4pKnBv9CJ2fUdXJMkJHOSuq7HUPmdS+OVUXQA3XOuSVS1Bhkt4xJCpqDTMV4JUVitglmSNtqrHSNFJCqyNwvEK0ZN4dYwMEAWNYc38qT6z0Ydtf0Aix3+4FERoSakfVccvb/PhIHHivxxx1ODS3soq12N8wrBs2dTGbTnZugrXZ2DPYpfdDUsxAlDGoB5rplZ8Y=
   # PYPI_PASS
   - secure: VBtSEaK399NxRj3hBhLM11SSsz+orMYe9F4AMw2LTUq548et0+4pMcv+DewNaihye43jtZYBA09ZZMREFTLBgN74Nu+vf/RAwBNHkUAZOAIwKk6MrqaLwjXkoB6n/5fKX9/5VweztJHpVY4zppmz+P2AFa8XDpLyYZQ553P1Mm60Sl/W+mpTs5/L0yVv+Rpe2ATww679CuLQvvwMEc9HS4cmCH38IaMa9z3J5BiXVHAbzJndiUGvFABcewgHNgYAI2z5xOwzIkr7YsgAb/3bXrGp4DXhf2436NZIqu7bi6VJMIRDkgh5eFwJ8bLpMXQxO6G90o48E2otbapu6OUTsODSMYKbVtWJmK8y29GSnLcAuIrimuYFBQ/n8sFWykpRkNgfvMtpxYGl+QD14/2aKtCmayjLeoqC/0+dZmKGZJPSzq1nGN4mrPsbXj2EWrepb9xX8JRf15Rx3OeugfrtTA+2qiqpAEPXyrAouWBEitCjTtIwAdnzcOA4qQGFq2OjGxQvZBjuYUFxj/L8JH1vWROZw9d5r3zhiT30SxvSB25MwLKIZ4E0yXrHq2vxLIgMa1K8gIpv9V/7A7kR8piQWVIgplrurrg3PBydCNlOMZwL99HHiebvFBN+EdYX/if2a/oScHwMCaOPeBUlwZ1mz3alLgqf/PJAQkphVJxnNVU=
-
