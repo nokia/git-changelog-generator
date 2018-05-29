@@ -30,7 +30,7 @@ btparams=(
     -H "X-Bintray-Publish: 1"
 )
 
-for f in dist/*.rpm; do
+for f in dist/SRPMS/*${VERSION}*.src.rpm dist/RPMS/*/*${VERSION}*.rpm; do
   curl -T "$f" -u"${USER}:${PASSWORD}" "${btparams[@]}" \
     "${API_URL}/content/${USER}/yum-oss/stable/${f##*/}"
   # PUT /content/:subject/:repo/:file_path
