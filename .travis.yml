@@ -17,7 +17,7 @@ install:
 script:
 - . venv/bin/activate
 # Tag trumps the version; then missing, version from file is taken instead
-- export VERSION=${TRAVIS_TAG:-$(<version.txt).dev${TRAVIS_BUILD_NUMBER}}
+- export VERSION=${TRAVIS_TAG:-$(<version.txt)dev${TRAVIS_BUILD_NUMBER}}
 - python setup.py test build sdist bdist_wheel bdist
 - ls -al dist/
 - rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
