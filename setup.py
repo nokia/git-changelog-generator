@@ -53,7 +53,7 @@ logging.basicConfig(level=logging.INFO)
 setup(
     name='gcg',
     version=get_version('version.txt'),
-    packages=['gcg', 'tests'],
+    packages=['gcg'],
     url='https://github.com/nokia/git-changelog-generator',
     license='BSD-3-Clause',
     author='Waldek Maleska',
