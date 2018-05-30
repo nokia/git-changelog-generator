@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{_name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Waldek Maleska <waldek.maleska@nokia.com>
-Requires: python2-semver >= 2.0.1, python-jinja2 >= 2.7, GitPython >= 1.0.1
+Requires: python2-semver >= 2.0.1, python-jinja2 >= 2.7, GitPython >= 1.0.1, python-setuptools >= 0.9.8
 Url: https://github.com/nokia/git-changelog-generator
 
 %description
@@ -28,7 +28,7 @@ GCG stands for Git Changelog Generator.
 %{__python} setup.py build
 
 %install
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build
+%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build --install-lib /usr/lib/
 
 %clean
 rm -rf $RPM_BUILD_ROOT

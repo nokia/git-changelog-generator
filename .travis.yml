@@ -17,7 +17,7 @@ install:
 script:
 - . venv/bin/activate
 # Tag trumps the version; then missing, version from file is taken instead
-- export VERSION=${TRAVIS_TAG:-$(<version.txt).dev${TRAVIS_BUILD_NUMBER}}
+- export VERSION=${TRAVIS_TAG:-$(<version.txt)dev${TRAVIS_BUILD_NUMBER}}
 - python setup.py test build sdist bdist_wheel bdist
 - ls -al dist/
 - rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
@@ -50,7 +50,7 @@ deploy:
     repo: nokia/git-changelog-generator
 - provider: script
   skip_cleanup: true
-  script: bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  script: DEBUG=1 bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
   on:
     tags: true
     repo: nokia/git-changelog-generator
