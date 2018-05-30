@@ -21,4 +21,4 @@ bash ${opts:-} "${dir}/deploy_deb.bash" "$@"
 # the repository metadata on its own. There were cases though when it didn't
 # hence an explicit request to do so
 bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "$1" "deb-oss"
-bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "${1}/yum-oss"
+bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "$1" "yum-oss/stable"
