@@ -28,7 +28,7 @@ GCG stands for Git Changelog Generator.
 %{__python} setup.py build
 
 %install
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build --install-lib /usr/lib/
+%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build --install-lib /usr/lib/python2.7/site-packages
 
 %clean
 rm -rf $RPM_BUILD_ROOT
