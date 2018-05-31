@@ -26,7 +26,7 @@ function assert_vars_set {
     for n in "$@"; do
         if [[ -n "$n" ]] && [[ -z "${!n:-}" ]]; then
             >&2 show_help
-            >&2 echo "ERROR: value of ${n} not provided (is ${!n:-})"
+            >&2 echo "ERROR: value for ${n} was not provided"
             exit 1
         else
             if [[ -n ${extra_params:-} ]]; then
@@ -42,9 +42,12 @@ declare version
 declare rpm_lifecycle
 declare deb_component
 declare extra_params=
+declare deb_repo="deb-oss"
+declare yum_repo="yum-oss"
 
 while [[ $# -gt 0 ]]; do
     declare opt="$1"
+    shift
     case "$opt" in
     -h)
         show_help
@@ -53,23 +56,22 @@ while [[ $# -gt 0 ]]; do
     -d) opts="-x"
         extra_params="-d"
         ;;
-    -u) user=${opt:-}
+    -u) user=${1:-}
         shift
         ;;
-    -p) password=${opt:-}
+    -p) password=${1:-}
         shift
         ;;
-    -v) version=${opt:-}
+    -v) version=${1:-}
         shift
         ;;
-    -r) rpm_lifecycle=${opt:-dev}
+    -r) rpm_lifecycle=${1:-dev}
         shift
         ;;
-    -c) deb_component=${opt:-dev}
+    -c) deb_component=${1:-dev}
         shift
         ;;
     esac
-    shift
 done
 
 assert_vars_set user password version rpm_lifecycle deb_component
@@ -82,5 +84,5 @@ bash ${opts:-} "${dir}/deploy_rpm.bash" -u "$user" -p "$password" -v "$version" 
 # This in theory is not needed, bintray should should refresh
 # the repository metadata on its own. There were cases though when it didn't
 # hence an explicit request to do so
-bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "deb-oss"
-bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "yum-oss/${rpm_lifecycle}"
+bash ${opts:-} "${dir}/calc_metadata.bash" "$user" "$password" "$deb_repo"
+bash ${opts:-} "${dir}/calc_metadata.bash" "$user" "$password" "${yum_repo}/${rpm_lifecycle}"
