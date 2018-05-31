@@ -239,7 +239,7 @@ def log_level_from_verbosity(count):
     retval = logging.WARNING
     if count == 1:
         retval = logging.INFO
-    elif count == 2:
+    elif count >= 2:
         retval = logging.DEBUG
     return retval
 

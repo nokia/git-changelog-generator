@@ -3,6 +3,9 @@
 %define release 1
 # explicitly override this for the sake of rpmbuild on Ubuntu (dash shell)
 %define _buildshell /bin/bash
+# See https://fedoraproject.org/wiki/Packaging:Python
+%define __python /usr/bin/python2
+%define python2_sitelib     %(%{__python} -c "from distutils.sysconfig import get_python_lib; import sys; sys.stdout.write(get_python_lib())")
 
 Summary: Git Changelog Generator
 Name: %{name}
@@ -28,7 +31,7 @@ GCG stands for Git Changelog Generator.
 %{__python} setup.py build
 
 %install
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build --install-lib /usr/lib/
+%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES --skip-build --install-lib %{python2_sitelib}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
