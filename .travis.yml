@@ -20,8 +20,10 @@ script:
 - export VERSION=${TRAVIS_TAG:-$(<version.txt).dev${TRAVIS_BUILD_NUMBER}}
 - python setup.py test build sdist bdist_wheel bdist
 - ls -al dist/
-- rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
 - python setup.py --command-packages=stdeb.command bdist_deb
+- rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
+- rpm -qlpi --requires --verbose dist/RPMS/*/*.rpm dist/SRPMS/*.rpm
+- dpkg --info deb_dist/*.deb
 
 before_deploy:
 - ls -al; pwd; find dist deb_dist -ls
