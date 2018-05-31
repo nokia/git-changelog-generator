@@ -31,12 +31,15 @@ class TestHelperFunctions(object):
     def test_loglevels_mapping():
         from gcg.entrypoint import log_level_from_verbosity
 
-        assert logging.WARNING == log_level_from_verbosity(0)
+        # lower threshold is WARNING
         assert logging.WARNING == log_level_from_verbosity(-1)
-        assert logging.WARNING == log_level_from_verbosity(3)
+        assert logging.WARNING == log_level_from_verbosity(0)
 
         assert logging.INFO == log_level_from_verbosity(1)
-        assert logging.DEBUG == log_level_from_verbosity(2)
+
+        # upper treshold is DEBUG
+        for i in range(2, 42):
+            assert logging.DEBUG == log_level_from_verbosity(i)
 
     def test_print_changelog_file_ok(self):
         """print_changelog() succesfully creates output file"""

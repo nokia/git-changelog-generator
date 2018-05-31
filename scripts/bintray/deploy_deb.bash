@@ -20,7 +20,7 @@ function assert_vars_set {
     for n in "$@"; do
         if [[ -n "$n" ]] && [[ -z "${!n}" ]]; then
             >&2 show_help
-            >&2 echo "ERROR: value of ${n} not provided"
+            >&2 echo "ERROR: value for ${n} was not provided"
             exit 1
         fi
     done
@@ -33,6 +33,7 @@ declare deb_component
 
 while [[ $# -gt 0 ]]; do
     declare opt="$1"
+    shift
     case "$opt" in
     -h)
         show_help
@@ -40,20 +41,19 @@ while [[ $# -gt 0 ]]; do
         ;;
     -d) opts="-x"
         ;;
-    -u) user=${opt:-}
+    -u) user=${1:-}
         shift
         ;;
-    -p) password=${opt:-}
+    -p) password=${1:-}
         shift
         ;;
-    -v) version=${opt:-}
+    -v) version=${1:-}
         shift
         ;;
-    -c) deb_component=${opt:-dev}
+    -c) deb_component=${1:-dev}
         shift
         ;;
     esac
-    shift
 done
 
 assert_vars_set user password version deb_component
