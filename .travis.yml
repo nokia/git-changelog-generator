@@ -23,7 +23,7 @@ script:
 - python setup.py --command-packages=stdeb.command bdist_deb
 - rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
 - rpm -qlpi --requires --verbose dist/RPMS/*/*.rpm dist/SRPMS/*.rpm
-- dpkg --info deb_dist/*.deb
+- for i in deb_dist/*.deb; do dpkg --info "$i" && dpkg -c "$i"; done
 
 before_deploy:
 - ls -al; pwd; find dist deb_dist -ls
@@ -52,7 +52,7 @@ deploy:
     repo: nokia/git-changelog-generator
 - provider: script
   skip_cleanup: true
-  script: DEBUG=1 bash scripts/bintray/deploy.bash "$BINTRAY_USER" "$BINTRAY_KEY" "$(< version.txt)"
+  script: DEBUG=1 bash scripts/bintray/deploy.bash -u "$BINTRAY_USER" -p "$BINTRAY_KEY" -v "$(< version.txt)" -r dev -c dev
   on:
     tags: true
     repo: nokia/git-changelog-generator

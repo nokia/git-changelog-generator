@@ -1,24 +1,86 @@
 #!/bin/bash
-# set -eEuo pipefail
 
-# $1 - user
-# $2 - password
-# $3 - version
-# $4 - ignored for RPM; DEB: component
+set -eEuo pipefail
 
-# TODO: turn this into proper deploy scripts
+# TODO; more available arguments for this script
+# instead of hardcoded values
 
-if [[ -n "${DEBUG:-}" ]]; then
-    opts="-x"
-fi
+function show_help {
+    cat - <<HEREDOC
+Usage:
+
+    ${0##*/} -u USERNAME -p PASSWORD -v VERSION -r RPM_LIFECYCLE -c DEB_COMPONENT [-d]
+
+    where:
+        -d            - debug mode
+        RPM_LIFECYCLE - the label identyfuing repository
+                        (e.g. stable, testing, unstable). Defaults to 'dev'.
+        DEB_COMPONENT - component within the Debian repository;
+                        (e.g. stable, testing, unstable). Defaults to 'dev'.
+
+HEREDOC
+}
+
+function assert_vars_set {
+    declare n
+    for n in "$@"; do
+        if [[ -n "$n" ]] && [[ -z "${!n:-}" ]]; then
+            >&2 show_help
+            >&2 echo "ERROR: value of ${n} not provided (is ${!n:-})"
+            exit 1
+        else
+            if [[ -n ${extra_params:-} ]]; then
+                >&2 echo "DEBUG: ${n}=${!n:-}"
+            fi
+        fi
+    done
+}
+
+declare user
+declare password
+declare version
+declare rpm_lifecycle
+declare deb_component
+declare extra_params=
+
+while [[ $# -gt 0 ]]; do
+    declare opt="$1"
+    case "$opt" in
+    -h)
+        show_help
+        exit 0
+        ;;
+    -d) opts="-x"
+        extra_params="-d"
+        ;;
+    -u) user=${opt:-}
+        shift
+        ;;
+    -p) password=${opt:-}
+        shift
+        ;;
+    -v) version=${opt:-}
+        shift
+        ;;
+    -r) rpm_lifecycle=${opt:-dev}
+        shift
+        ;;
+    -c) deb_component=${opt:-dev}
+        shift
+        ;;
+    esac
+    shift
+done
+
+assert_vars_set user password version rpm_lifecycle deb_component
 
 dir=$(dirname "$(readlink -f "$0")")
 
-bash ${opts:-} "${dir}/deploy_rpm.bash" "$@"
-bash ${opts:-} "${dir}/deploy_deb.bash" "$@"
+bash ${opts:-} "${dir}/deploy_deb.bash" -u "$user" -p "$password" -v "$version" -c "$deb_component" $extra_params
+bash ${opts:-} "${dir}/deploy_rpm.bash" -u "$user" -p "$password" -v "$version" -r "$rpm_lifecycle" $extra_params
 
 # This in theory is not needed, bintray should should refresh
 # the repository metadata on its own. There were cases though when it didn't
 # hence an explicit request to do so
 bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "deb-oss"
-bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "yum-oss/stable"
+bash ${opts:-} "${dir}/calc_metadata.bash" "$1" "$2" "yum-oss/${rpm_lifecycle}"
