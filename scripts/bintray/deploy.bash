@@ -13,7 +13,7 @@ Usage:
 
     where:
         -d            - debug mode
-        RPM_LIFECYCLE - the label identyfuing repository
+        RPM_LIFECYCLE - the label identyfying repository
                         (e.g. stable, testing, unstable). Defaults to 'dev'.
         DEB_COMPONENT - component within the Debian repository;
                         (e.g. stable, testing, unstable). Defaults to 'dev'.

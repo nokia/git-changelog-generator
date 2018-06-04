@@ -7,17 +7,16 @@ set -eEuo pipefail
 
 function show_help {
     cat - <<HEREDOC
+A trivial release 
+
 Usage:
 
     ${0##*/} -v VERSION [-n] [-d]
 
     where:
+        -v VERSION    - provide the version to release; mandatory
         -d            - debug mode
         -n            - no-op mode; just print what would be done
-        RPM_LIFECYCLE - the label identyfuing repository
-                        (e.g. stable, testing, unstable). Defaults to 'dev'.
-        DEB_COMPONENT - component within the Debian repository;
-                        (e.g. stable, testing, unstable). Defaults to 'dev'.
 
 HEREDOC
 }
@@ -39,13 +38,13 @@ function assert_vars_set {
 
 declare version
 declare dbgflag=
-declare root
+declare git_repo_rootdir
 declare noop=
 
 if ! command -v git >/dev/null; then
     >&2 echo "ERROR: release of python-gcg requires git command available"
 fi
-root=$(git rev-parse --show-toplevel)
+git_repo_rootdir=$(git rev-parse --show-toplevel)
 
 while [[ $# -gt 0 ]]; do
     declare opt="$1"
@@ -69,9 +68,9 @@ done
 if [[ -n "$dbgflag" ]]; then
     set -x
 fi
-assert_vars_set version root
+assert_vars_set version git_repo_rootdir
 
-[[ $version != $(<"$root"/version.txt) ]] &&
+[[ $version != $(<"$git_repo_rootdir"/version.txt) ]] &&
     >&2 cat - <<EOF
 
 ERROR: the version you provided doesn't match the version you provided.
