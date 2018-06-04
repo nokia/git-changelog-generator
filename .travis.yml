@@ -54,10 +54,10 @@ deploy:
 - provider: script
   skip_cleanup: true
   script: >
-            DEBUG=1 bash scripts/bintray/deploy.bash -u "$BINTRAY_USER" \
-              -p "$BINTRAY_KEY" -v "$(< version.txt)" \
-              -r ${lifecycle:-${DEFAULT_RPM_LIFECYCLE}} \
-              -c ${component:-${DEFAULT_DEB_COMPONENT}} -d 
+            bash scripts/bintray/deploy.bash -u "$BINTRAY_USER"
+            -p "$BINTRAY_KEY" -v "$(< version.txt)"
+            -r ${lifecycle:-${DEFAULT_RPM_LIFECYCLE}}
+            -c ${component:-${DEFAULT_DEB_COMPONENT}} -d
   on:
     tags: true
     repo: nokia/git-changelog-generator

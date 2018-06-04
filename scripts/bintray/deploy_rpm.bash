@@ -10,18 +10,23 @@ Usage:
 
     where:
         -d            - debug mode
-        RPM_LIFECYCLE - the label identyfuing repository
+        RPM_LIFECYCLE - the label identyfying repository
                         (e.g. stable, testing, unstable). Defaults to 'dev'.
 
 HEREDOC
 }
 
 function assert_vars_set {
+    declare n
     for n in "$@"; do
-        if [[ -n "$n" ]] && [[ -z "${!n}" ]]; then
+        if [[ -n "$n" ]] && [[ -z "${!n:-}" ]]; then
             >&2 show_help
             >&2 echo "ERROR: value for ${n} was not provided"
             exit 1
+        else
+            if [[ -n ${extra_params:-} ]]; then
+                >&2 echo "DEBUG: ${n}=${!n:-}"
+            fi
         fi
     done
 }
