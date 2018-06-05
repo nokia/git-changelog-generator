@@ -34,7 +34,7 @@ before_deploy:
         false
     fi
 - cp -v pypirc ~/.pypirc && cat ~/.pypirc
-- if [[ $VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then component=main; lifecycle=stable; fi
+- if [[ $VERSION =~ ^[0-9]+(\.[0-9]+)*$ ]]; then component=main; lifecycle=stable; fi
 
 
 deploy:
