@@ -5,7 +5,11 @@
 %define _buildshell /bin/bash
 # See https://fedoraproject.org/wiki/Packaging:Python
 %define __python /usr/bin/python2
-%define python2_sitelib     %(%{__python} -c "from distutils.sysconfig import get_python_lib; import sys; sys.stdout.write(get_python_lib())")
+# TODO: this should work if we had Travis build the RPM on Centos
+#       as currently build happens on Ubuntu, we need to fix the path instead
+#       Also, watch out when using virtualenv - this might make a mixup
+# %define python2_sitelib     %(%{__python} -c "from distutils.sysconfig import get_python_lib; import sys; sys.stdout.write(get_python_lib())")
+%define python2_sitelib /usr/lib/python2.7/site-packages
 
 Summary: Git Changelog Generator
 Name: %{name}
