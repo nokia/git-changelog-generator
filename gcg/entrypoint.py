@@ -197,7 +197,7 @@ def collate_entry_header_data(repo, entries, options):
             logging.info("Retrieving details of tag '%s'", version)
             hdr = log_entry_header_from_tag(repo.tags[version].tag)
         stripped = version
-        if stripped and stripped.startswith(options.prefix):
+        if options.prefix and stripped.startswith(options.prefix):
             stripped = stripped[len(options.prefix):]
         hdr['version'] = stripped or options.current_version
         hdr['deb_urgency'] = options.deb_urgency
