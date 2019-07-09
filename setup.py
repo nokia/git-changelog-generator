@@ -62,6 +62,7 @@ setup(
     long_description=read('README.rst'),
     tests_require=read_list('requirements_test.txt'),
     setup_requires=read_list('requirements_setup.txt'),
+    install_requires=read_list('requirements_install.txt'),
     entry_points={
         'console_scripts': [
             'gcg = gcg.entrypoint:main',
