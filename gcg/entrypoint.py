@@ -143,6 +143,13 @@ def parse_args(argv):
         help="Verbosity level. Specify twice for debug logs as well.",
         action="count", default=0
     )
+    parser.add_argument(
+        '-P', '--prefix',
+        help="""Prefix to be stripped off tags before processing.
+        eg.: specifying v recognizes tags like v1.0.0 v1.0.1 and
+        processes them as if the were 1.0.0 1.0.1""",
+        action="store",
+    )
 
     options = parser.parse_args(argv)
     if options.output_format == 'deb':
@@ -189,7 +196,10 @@ def collate_entry_header_data(repo, entries, options):
         else:
             logging.info("Retrieving details of tag '%s'", version)
             hdr = log_entry_header_from_tag(repo.tags[version].tag)
-        hdr['version'] = version or options.current_version
+        stripped = version
+        if stripped and stripped.startswith(options.prefix):
+            stripped = stripped[len(options.prefix):]
+        hdr['version'] = stripped or options.current_version
         hdr['deb_urgency'] = options.deb_urgency
         hdr['deb_distro'] = options.deb_distribution
         hdr['deb_name'] = options.deb_package_name
@@ -402,7 +412,7 @@ def traverse_version_tree(client, repo, options, upper_limit, lower_limit):
     curr_entry = list()
     curr_tag = ''
     bugtracking_regexp = re.compile(options.bug_tracking_pattern, re.MULTILINE)
-    tag_filter = TagFilter(None)
+    tag_filter = TagFilter(None, options.prefix)
 
     for commit in repo_iterate(repo, upper_limit, lower_limit):
         logging.debug("Processing commit %s (%s)", commit.hexsha,
