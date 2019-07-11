@@ -144,7 +144,7 @@ def parse_args(argv):
         action="count", default=0
     )
     parser.add_argument(
-        '-P', '--prefix',
+        '-P', '--tag-prefix',
         help="""Prefix to be stripped off tags before processing.
         eg.: specifying v recognizes tags like v1.0.0 v1.0.1 and
         processes them as if the were 1.0.0 1.0.1""",
@@ -197,8 +197,8 @@ def collate_entry_header_data(repo, entries, options):
             logging.info("Retrieving details of tag '%s'", version)
             hdr = log_entry_header_from_tag(repo.tags[version].tag)
         stripped = version
-        if options.prefix and stripped.startswith(options.prefix):
-            stripped = stripped[len(options.prefix):]
+        if options.tag_prefix and stripped.startswith(options.tag_prefix):
+            stripped = stripped[len(options.tag_prefix):]
         hdr['version'] = stripped or options.current_version
         hdr['deb_urgency'] = options.deb_urgency
         hdr['deb_distro'] = options.deb_distribution
@@ -412,7 +412,7 @@ def traverse_version_tree(client, repo, options, upper_limit, lower_limit):
     curr_entry = list()
     curr_tag = ''
     bugtracking_regexp = re.compile(options.bug_tracking_pattern, re.MULTILINE)
-    tag_filter = TagFilter(None, options.prefix)
+    tag_filter = TagFilter(None, options.tag_prefix)
 
     for commit in repo_iterate(repo, upper_limit, lower_limit):
         logging.debug("Processing commit %s (%s)", commit.hexsha,
