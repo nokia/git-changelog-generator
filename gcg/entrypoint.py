@@ -15,12 +15,12 @@ from __future__ import print_function
 
 import argparse
 import collections
-import email.utils
 import logging
 import os
 import re
 import sys
-import time
+from datetime import datetime
+from tzlocal import get_localzone
 
 import git
 import jinja2
@@ -42,7 +42,6 @@ def parse_args(argv):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Generate changelogs out of Git history.",
         epilog="""
-        FIXME: timezone manipulations
         FIXME: chronologically unordered releases cause issues
         """
     )
@@ -150,6 +149,7 @@ def parse_args(argv):
             raise ValueError("For 'deb', the package name (-n) is mandatory")
         if options.deb_distribution is None:
             raise ValueError("For 'deb', the --deb-distribution is mandatory")
+    options.tz = get_localzone()
 
     return options
 
@@ -185,10 +185,10 @@ def collate_entry_header_data(repo, entries, options):
     retval = {}
     for version in entries:
         if not version or (entries[version] and not options.prefer_tags):
-            hdr = log_entry_header_from_commit(entries[version][0])
+            hdr = log_entry_header_from_commit(entries[version][0], options)
         else:
             logging.info("Retrieving details of tag '%s'", version)
-            hdr = log_entry_header_from_tag(repo.tags[version].tag)
+            hdr = log_entry_header_from_tag(repo.tags[version].tag, options)
         hdr['version'] = version or options.current_version
         hdr['deb_urgency'] = options.deb_urgency
         hdr['deb_distro'] = options.deb_distribution
@@ -197,34 +197,32 @@ def collate_entry_header_data(repo, entries, options):
     return retval
 
 
-def log_entry_header_from_commit(the_commit):
+def log_entry_header_from_commit(the_commit, options):
     """
     Retrieve information for the release line from the commit
     :param the_commit: a git.Commit object
     :return: dictionary
     """
-    # FIXME: how about timezones, dear people?
     hdr = dict()
-    hdr['date'] = time.gmtime(the_commit.authored_date)
-    hdr['date_rpm'] = time.strftime('%a %b %d %Y', hdr['date'])
-    hdr['date_deb'] = email.utils.formatdate(the_commit.authored_date)
+    hdr['date'] = datetime.fromtimestamp(the_commit.authored_date, options.tz)
+    hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
+    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %R:%S %z')
     hdr['author'] = str(the_commit.author.name)
     hdr['email'] = str(the_commit.author.email)
     return hdr
 
 
-def log_entry_header_from_tag(tag):
+def log_entry_header_from_tag(tag, options):
     """
     Retrieve information for the release line from the tag
     :param tag: a git.Tag object
     :return: dictionary
     """
-    # FIXME: how about timezones, dear people?
     hdr = dict()
     authored_date = tag.tagged_date
-    hdr['date'] = time.gmtime(authored_date)
-    hdr['date_rpm'] = time.strftime('%a %b %d %Y', hdr['date'])
-    hdr['date_deb'] = email.utils.formatdate(authored_date)
+    hdr['date'] = datetime.fromtimestamp(authored_date, options.tz)
+    hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
+    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %R:%S %z')
     hdr['author'] = str(tag.tagger.name)
     hdr['email'] = str(tag.tagger.email)
     return hdr
