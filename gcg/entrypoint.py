@@ -191,7 +191,9 @@ def collate_entry_header_data(repo, entries, options):
     """
     retval = {}
     for version in entries:
-        if not version or (entries[version] and not options.prefer_tags):
+        if not version or (entries[version]
+                           and (repo.tags[version].tag is None
+                                or (not options.prefer_tags))):
             hdr = log_entry_header_from_commit(entries[version][0])
         else:
             logging.info("Retrieving details of tag '%s'", version)
