@@ -1,0 +1,26 @@
+%_buildshell        /bin/bash
+
+%__python2          /usr/bin/python2
+%__python3          /usr/bin/python3
+%python2_sitelib    /usr/lib/python2.7/site-packages
+%python3_sitelib    /usr/lib/python3.7/site-packages
+
+%py2_build() %{expand:\\\
+  %{__python2} setup.py build --force
+  sleep 1
+}
+
+%py3_build() %{expand:\\\
+  %{__python3} setup.py build --force
+  sleep 1
+}
+
+%py2_install() %{expand:\\\
+  %{__python2} setup.py install --force --root=%{buildroot} --no-compile -O0 --install-scripts=%{_bindir} --install-lib %{python2_sitelib}
+  sleep 1
+}
+
+%py3_install() %{expand:\\\
+  %{__python3} setup.py install --force --root=%{buildroot} --no-compile -O0 --install-scripts=%{_bindir} --install-lib %{python3_sitelib}
+  sleep 1
+}

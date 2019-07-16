@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#
 
 """
 gcg stands for Git Changelog Generator

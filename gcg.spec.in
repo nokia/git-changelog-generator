@@ -1,0 +1,157 @@
+%global srcname gcg
+%global rel 1%{?dist}
+
+%if 0%{?fedora} || 0%{?mageia} || 0%{?suse_version}
+%bcond_without python3
+%else
+%bcond_with python3
+%endif
+
+%if 0%{?fedora} && 0%{?fedora} >= 29
+%bcond_with python2
+%else
+%bcond_without python2
+%endif
+
+Name: %{srcname}
+Version: _VERSION_
+Release: %{rel}
+Summary: Git Changelog Generator
+%if 0%{?suse_version}
+Group:   Development/Tools/Other
+%endif
+
+License: BSD-3-Clause
+Url: https://github.com/nokia/git-changelog-generator
+Source0: https://https://github.com/felfert/git-changelog-generator/releases/download/%{version}/%{name}-%{version}.tar.gz
+
+BuildRoot: %{_tmppath}/%{_name}-%{version}-%{release}-buildroot
+
+BuildArch: noarch
+
+%global _description \
+GCG stands for Git Changelog Generator.
+
+
+%description %{_description}
+
+%if %{with python2}
+%package -n python2-%{srcname}
+Summary: %{summary}
+%{?python_provide:%python_provide python2-%{srcname}}
+BuildRequires: python2-setuptools
+BuildRequires: python2-semver >= 2.0.1
+BuildRequires: python2-jinja2 >= 2.8
+%if 0%{?mageia}
+BuildRequires: python2-gitpython >= 1.0.1
+%else
+BuildRequires: python2-GitPython >= 1.0.1
+%endif
+BuildRequires: python2-rpm-macros python-rpm-macros
+Requires: python2-semver >= 2.0.1
+Requires: python2-jinja2 >= 2.8
+Requires: python2-GitPython >= 1.0.1
+%description -n python2-%{srcname} %{_description}
+
+Python 2 version.
+
+%endif
+
+%if %{with python3}
+%package -n python3-%{srcname}
+Summary: %{summary}
+%{?python_provide:%python_provide python3-%{srcname}}
+BuildRequires: python3-setuptools
+BuildRequires: python3-semver >= 2.0.1
+BuildRequires: python3-jinja2 >= 2.8
+%if 0%{?mageia}
+BuildRequires: python3-gitpython >= 1.0.1
+%else
+BuildRequires: python3-GitPython >= 1.0.1
+%endif
+BuildRequires: python3-rpm-macros python-rpm-macros
+Requires(post): %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
+Requires: python3-semver >= 2.0.1
+Requires: python3-jinja2 >= 2.8
+Requires: python3-GitPython >= 1.0.1
+%description -n python3-%{srcname} %{_description}
+
+Python 3 version.
+
+%endif
+
+%prep
+%autosetup -n %{srcname}-%{version} -p1
+
+%build
+%if %{with python2}
+%py2_build
+%endif
+%if %{with python3}
+%py3_build
+%endif
+
+%install
+%if %{with python2}
+%py2_install
+mv %{buildroot}%{_bindir}/gcg{,-2}
+%endif
+%if %{with python3}
+%py3_install
+mv %{buildroot}%{_bindir}/gcg{,-3}
+%endif
+%if 0%{?fedora} >= 26 || ! %{with python2}
+ln -s %{_bindir}/gcg-3 %{buildroot}%{_bindir}/gcg
+%else
+ln -s %{_bindir}/gcg-2 %{buildroot}%{_bindir}/gcg
+%endif
+
+%check
+# Make sure the scripts use the expected python versions
+%if %{with python2}
+grep -q %{__python2} %{buildroot}%{_bindir}/gcg-2
+%endif
+%if %{with python3}
+grep -q %{__python3} %{buildroot}%{_bindir}/gcg-3
+%endif
+
+%if %{with python2}
+%files -n python2-%{srcname}
+%ghost %{_bindir}/gcg
+%ghost %{_sysconfdir}/alternatives/gcg
+%license LICENSE
+%doc README.rst
+%{python2_sitelib}/%{srcname}-*.egg-info/
+%{python2_sitelib}/%{srcname}/
+%{_bindir}/gcg-2
+
+%post -n python2-%{srcname}
+%{_sbindir}/update-alternatives --install %{_bindir}/gcg gcg %{_bindir}/gcg-2 90
+
+%postun -n python2-%{srcname}
+if [ $1 -eq 0 ]; then
+    %{_sbindir}/update-alternatives --remove gcg %{_bindir}/gcg-2
+fi
+%endif
+
+%if %{with python3}
+%files -n python3-%{srcname}
+%ghost %{_bindir}/gcg
+%ghost %{_sysconfdir}/alternatives/gcg
+%license LICENSE
+%doc README.rst
+%{python3_sitelib}/%{srcname}-*.egg-info/
+%{python3_sitelib}/%{srcname}/
+%{_bindir}/gcg-3
+
+%post -n python3-%{srcname}
+%{_sbindir}/update-alternatives --install %{_bindir}/gcg gcg %{_bindir}/gcg-3 90
+
+%postun -n python3-%{srcname}
+if [ $1 = 0 ]; then
+    %{_sbindir}/update-alternatives --remove gcg %{_bindir}/gcg-3
+fi
+%endif
+
+%changelog

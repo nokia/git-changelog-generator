@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+if [ "$1" = "configure" ] ; then
+        update-alternatives --install /usr/bin/gcg gcg /usr/bin/gcg-2 80
+fi
+exit 0

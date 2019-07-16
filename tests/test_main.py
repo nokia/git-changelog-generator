@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 Unit and component tests for the main module
@@ -126,7 +126,7 @@ class TestMain(object):
         assert os.path.exists(out_file)
 
         lines = [line.rstrip('\n') for line in open(out_file)]
-        lines = filter(len, lines)
+        lines = list(filter(len, lines))
         assert lines[0] == 'foopkg (current) xenial; urgency=low'
         assert lines[1].startswith('  * Second')
         assert lines[2].startswith('  * First')
@@ -151,7 +151,7 @@ class TestMain(object):
         assert os.path.exists(out_file)
 
         lines = [line.rstrip('\n') for line in open(out_file)]
-        lines = filter(len, lines)
+        lines = list(filter(len, lines))
         assert lines[0] == 'package (current) xenial; urgency=high'
         assert lines[1].startswith('  * First')
 
@@ -225,7 +225,7 @@ class TestMain(object):
         assert os.path.exists(out_file)
 
         lines = [line.rstrip('\n') for line in open(out_file)]
-        lines = filter(len, lines)
+        lines = list(filter(len, lines))
         print(lines)
 
         count = len(lines)

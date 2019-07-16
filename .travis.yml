@@ -1,30 +1,57 @@
----
-language: bash
+language: python
 sudo: required
-dist: xenial
-
+dist: bionic
+python: 3.6
+git:
+  depth: false
+branches:
+  except:
+    - /^untagged/
+    - /\.dev[0-9]+$/
+virtualenv:
+  system_site_packages: true
 before_install:
+- git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
+- git fetch --tags
 - sudo apt-get -qq update
-- >
-    sudo apt-get install -y \
-        "rpm=4.12.*" "fakeroot=1.20.2-*" "jq=1.5+*" "python-all=2.7.*" "python-setuptools=20.*" "debhelper=9.*"
-
+- |
+  sudo apt-get install -y \
+      rpm fakeroot jq python-all python3-all python-setuptools python3-setuptools debhelper \
+      python-git python-semver python-jinja2 python3-git python3-semver python3-jinja2
 install:
-- virtualenv venv
-- . venv/bin/activate
-- pip install -r requirements_setup.txt -r requirements_test.txt
-
+- pip install -r requirements_test.txt
+- pip3 install -r requirements_test.txt
 script:
-- . venv/bin/activate
-# Tag trumps the version; then missing, version from file is taken instead
 - export VERSION=${TRAVIS_TAG:-$(<version.txt).dev${TRAVIS_BUILD_NUMBER}}
-- python setup.py test build sdist bdist_wheel bdist
-- ls -al dist/
-- python setup.py --command-packages=stdeb.command bdist_deb
-- rpmbuild -ba gcg.spec  --define "_topdir ${PWD}/dist" --define "_sourcedir ${PWD}/dist" --define "version ${VERSION}"
-- rpm -qlpi --requires --verbose dist/RPMS/*/*.rpm dist/SRPMS/*.rpm
-- for i in deb_dist/*.deb; do dpkg --info "$i" && dpkg -c "$i"; done
-
+- python setup.py test bdist_wheel
+- pip install dist/gcg-*.whl
+- gcg -O deb -n gcg -D unstable -c "${VERSION}" -o debian/changelog
+- sed -e  's/^$/./' -e 's/^/ /' LICENSE >> debian/copyright
+- python setup.py sdist
+- mkdir -p deb_dist
+- tar xzCf deb_dist dist/gcg-${VERSION}.tar.gz
+- pushd deb_dist/gcg-${VERSION} && dpkg-source -b . && popd
+- |
+  if test "${BUILD_BIN_PKGS}" = "yes" ; then
+    pushd deb_dist/gcg-${VERSION} && dpkg-buildpackage -A --no-sign && popd
+  fi
+- sed -e "s/_VERSION_/${VERSION}/g" < gcg.spec.in > gcg.spec
+- gcg -O rpm >> gcg.spec
+- cp .rpmmacros ~/
+- test "${BUILD_BIN_PKGS}" = "yes" && bt=a || bt=s
+- rpmbuild -b${bt} gcg.spec --nodeps --with python3 --define "_topdir ${PWD}/rpm_dist" --define "_sourcedir ${PWD}/dist"
+- rpm -qlpi --requires --verbose rpm_dist/RPMS/*/*.rpm rpm_dist/SRPMS/*.rpm
+before_deploy:
+- ls -al ; pwd
+- find dist -ls
+- find deb_dist -ls
+- find rpm_dist -ls
+- |
+  if [[ -n "$TRAVIS_TAG" ]] && [[ "${TRAVIS_TAG}" != "$(<version.txt)" ]]; then
+      >&2 echo "ERROR: You have marked a release by applying a Git tag and your version.txt doesn't match it"
+      >&2 echo "Tip: Don't tag if you want to deploy only to test.pypi.org"
+      false
+  fi
 before_deploy:
 - ls -al; pwd; find dist deb_dist -ls
 - >
