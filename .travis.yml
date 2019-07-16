@@ -38,8 +38,7 @@ script:
 - sed -e "s/_VERSION_/${VERSION}/g" < gcg.spec.in > gcg.spec
 - gcg -O rpm >> gcg.spec
 - cp .rpmmacros ~/
-- rpmbuild -bs gcg.spec --nodeps --with python3 --define "_topdir ${PWD}/rpm_dist" --define "_sourcedir ${PWD}/dist"
-- test "${BUILD_BIN_PKGS}" = "yes" && bt=b || bt=s
+- test "${BUILD_BIN_PKGS}" = "yes" && bt=a || bt=s
 - rpmbuild -b${bt} gcg.spec --nodeps --with python3 --define "_topdir ${PWD}/rpm_dist" --define "_sourcedir ${PWD}/dist"
 - rpm -qlpi --requires --verbose rpm_dist/RPMS/*/*.rpm rpm_dist/SRPMS/*.rpm
 before_deploy:
