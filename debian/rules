@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python2,python3 --buildsystem=python_distutils
+
+override_dh_auto_clean:
+	python2 setup.py clean -a
+	python3 setup.py clean -a
+	find . -name \*.pyc -exec rm {} \;
+
+override_dh_auto_build:
+	python2 setup.py build --force
+	python3 setup.py build --force
+
+override_dh_auto_install:
+	python2 setup.py install --force --root=debian/python-gcg --no-compile -O0 --install-layout=deb --prefix=/usr
+	mv debian/python-gcg/usr/bin/gcg debian/python-gcg/usr/bin/gcg-2
+	python3 setup.py install --force --root=debian/python3-gcg --no-compile -O0 --install-layout=deb --prefix=/usr
+	mv debian/python3-gcg/usr/bin/gcg debian/python3-gcg/usr/bin/gcg-3
+
+override_dh_python2:
+	dh_python2 --no-guessing-versions

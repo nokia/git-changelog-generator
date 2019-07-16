@@ -1,4 +1,7 @@
 include requirements_*.txt
+include LICENSE
 include README.rst
 include version.txt
 include gcg/templates/*
+include debian/*
+include debian/*/*

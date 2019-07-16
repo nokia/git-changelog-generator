@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#
 
 """
 Definition of exit codes for the main()

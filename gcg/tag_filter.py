@@ -1,4 +1,5 @@
-#!/usr/bin/env python2
+#
+
 """
 All functionality related to filtering out Git tags against
 Semantic Versioning or custum rules

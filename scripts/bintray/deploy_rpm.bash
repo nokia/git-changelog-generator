@@ -78,7 +78,7 @@ btparams=(
 
 set ${opts:-} >/dev/null
 
-for f in dist/RPMS/*/*.rpm dist/SRPMS/*.rpm; do
+for f in rpm_dist/RPMS/*/*.rpm rpm_dist/SRPMS/*.rpm; do
   curl --fail -T "$f" -u"${user}:${password}" "${btparams[@]}" \
     "${API_URL}/content/${BT_SUBJECT}/yum-oss/${rpm_lifecycle}/${f##*/}"
   # PUT /content/:subject/:repo/:file_path
