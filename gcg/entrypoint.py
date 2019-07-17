@@ -189,13 +189,13 @@ def collate_entry_header_data(repo, entries, options):
                 datetime
     """
     retval = {}
-    tz = get_localzone()
+    localtz = get_localzone()
     for version in entries:
         if not version or (entries[version] and not options.prefer_tags):
-            hdr = log_entry_header_from_commit(entries[version][0], tz)
+            hdr = log_entry_header_from_commit(entries[version][0], localtz)
         else:
             logging.info("Retrieving details of tag '%s'", version)
-            hdr = log_entry_header_from_tag(repo.tags[version].tag, tz)
+            hdr = log_entry_header_from_tag(repo.tags[version].tag, localtz)
         stripped = version
         if options.tag_prefix and stripped.startswith(options.tag_prefix):
             stripped = stripped[len(options.tag_prefix):]
@@ -207,15 +207,15 @@ def collate_entry_header_data(repo, entries, options):
     return retval
 
 
-def log_entry_header_from_commit(the_commit, tz):
+def log_entry_header_from_commit(the_commit, localtz):
     """
     Retrieve information for the release line from the commit
     :param the_commit: a git.Commit object
-    :param tz: a tzinfo object representing the local timezone
+    :param localtz: a tzinfo object representing the local timezone
     :return: dictionary
     """
     hdr = dict()
-    hdr['date'] = datetime.fromtimestamp(the_commit.authored_date, tz)
+    hdr['date'] = datetime.fromtimestamp(the_commit.authored_date, localtz)
     hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
     hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %T %z')
     hdr['author'] = str(the_commit.author.name)
@@ -223,16 +223,16 @@ def log_entry_header_from_commit(the_commit, tz):
     return hdr
 
 
-def log_entry_header_from_tag(tag, tz):
+def log_entry_header_from_tag(tag, localtz):
     """
     Retrieve information for the release line from the tag
     :param tag: a git.Tag object
-    :param tz: a tzinfo object representing the local timezone
+    :param localtz: a tzinfo object representing the local timezone
     :return: dictionary
     """
     hdr = dict()
     authored_date = tag.tagged_date
-    hdr['date'] = datetime.fromtimestamp(authored_date, tz)
+    hdr['date'] = datetime.fromtimestamp(authored_date, localtz)
     hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
     hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %T %z')
     hdr['author'] = str(tag.tagger.name)
