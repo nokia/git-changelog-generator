@@ -217,7 +217,7 @@ def log_entry_header_from_commit(the_commit, localtz):
     hdr = dict()
     hdr['date'] = datetime.fromtimestamp(the_commit.authored_date, localtz)
     hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
-    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %T %z')
+    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %H:%M:S %z')
     hdr['author'] = str(the_commit.author.name)
     hdr['email'] = str(the_commit.author.email)
     return hdr
@@ -234,7 +234,7 @@ def log_entry_header_from_tag(tag, localtz):
     authored_date = tag.tagged_date
     hdr['date'] = datetime.fromtimestamp(authored_date, localtz)
     hdr['date_rpm'] = hdr['date'].strftime('%a %b %d %Y')
-    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %T %z')
+    hdr['date_deb'] = hdr['date'].strftime('%a, %d %b %Y %H:%M:%S %z')
     hdr['author'] = str(tag.tagger.name)
     hdr['email'] = str(tag.tagger.email)
     return hdr
