@@ -5,6 +5,7 @@ Unit and component tests for the main module
 """
 
 from __future__ import print_function
+import re
 import os
 import shutil
 import tempfile
@@ -276,3 +277,80 @@ class TestMain(object):
         assert lines[0].endswith('> - current')
         assert lines[3].endswith('> - 1.0.1')
         assert lines[7].endswith('> - 1.0.0')
+
+    def test_timeformat_rpm(self):
+        """
+        Verify the format of the timestamp in the rpm changelog
+        """
+        input_messages = [
+            "First",
+        ]
+        # pylint: disable=unused-variable
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages=input_messages)
+        assert not repo.bare
+        assert client
+
+        out_file = os.path.join(self.tmp_dir, 'outfile')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'rpm', '-o', out_file])
+        assert os.path.exists(out_file)
+
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        lines = list(filter(len, lines))
+        assert len(lines) == 2
+        assert lines[1].startswith('- First')
+        mobj = re.search(r'^\* ([a-z]{3}) ([a-z]{3}) (\d\d) (\d{4})', lines[0],
+                         re.I)
+        assert mobj
+        grp = mobj.groups()
+        dnames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        mnames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                  'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        assert len(grp) == 4
+        assert grp[0] in dnames
+        assert grp[1] in mnames
+        assert int(grp[2]) > 0 and int(grp[2]) < 32
+        assert int(grp[3]) > 1969 and int(grp[3]) < 2039
+
+    def test_timeformat_deb(self):
+        """
+        Verify the format of the timestamp in the deb changelog
+        """
+        input_messages = [
+            "First",
+        ]
+        # pylint: disable=unused-variable
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages=input_messages)
+        assert not repo.bare
+        assert client
+
+        out_file = os.path.join(self.tmp_dir, 'outfile')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'deb', '-o', out_file, '-n', 'package',
+            '-D', 'unstable'])
+        assert os.path.exists(out_file)
+
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        lines = list(filter(len, lines))
+        assert len(lines) == 3
+        assert lines[0] == 'package (current) unstable; urgency=low'
+        assert lines[1].startswith('  * First')
+        mobj = re.search(r'([a-z]{3}), (\d\d) ([a-z]{3}) (\d{4}) '
+                         + r'(\d\d):(\d\d):(\d\d) [+-](\d{4})$', lines[2],
+                         re.I)
+        assert mobj
+        grp = mobj.groups()
+        dnames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        mnames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                  'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        assert len(grp) == 8
+        assert grp[0] in dnames
+        assert int(grp[1]) > 0 and int(grp[1]) < 32
+        assert grp[2] in mnames
+        assert int(grp[3]) > 1969 and int(grp[3]) < 2039
+        assert int(grp[4]) > 0 and int(grp[4]) < 24
+        assert int(grp[5]) > 0 and int(grp[5]) < 60
+        assert int(grp[6]) > 0 and int(grp[6]) < 60
+        assert int(grp[7]) >= 0 and int(grp[7]) <= 1400
