@@ -350,7 +350,7 @@ class TestMain(object):
         assert int(grp[1]) > 0 and int(grp[1]) < 32
         assert grp[2] in mnames
         assert int(grp[3]) > 1969 and int(grp[3]) < 2039
-        assert int(grp[4]) > 0 and int(grp[4]) < 24
-        assert int(grp[5]) > 0 and int(grp[5]) < 60
-        assert int(grp[6]) > 0 and int(grp[6]) < 60
+        assert int(grp[4]) >= 0 and int(grp[4]) < 24
+        assert int(grp[5]) >= 0 and int(grp[5]) < 60
+        assert int(grp[6]) >= 0 and int(grp[6]) < 60
         assert int(grp[7]) >= 0 and int(grp[7]) <= 1400
