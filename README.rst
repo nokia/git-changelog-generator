@@ -159,3 +159,9 @@ RPM template
 
 Based on one of allowed formats listed at
 https://fedoraproject.org/wiki/Packaging:Guidelines?rd=Packaging/Guidelines#Changelogs
+
+
+License
+-------
+
+This project is licensed under the BSD-3-Clause license - see the `LICENSE <https://github.com/nokia/git-changelog-generator/blob/master/LICENSE>`_.
