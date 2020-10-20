@@ -354,3 +354,30 @@ class TestMain(object):
         assert int(grp[5]) >= 0 and int(grp[5]) < 60
         assert int(grp[6]) >= 0 and int(grp[6]) < 60
         assert int(grp[7]) >= 0 and int(grp[7]) <= 1400
+
+    def test_prefer_tags(self):
+        input_data = [
+            ("1st", None),
+            ("2rd", "1.0.0"),
+            ("3rd", None),
+            ("4th", "1.0.1", "tagmsg1"),
+            ("5th", None),
+            ("6th", "1.0.2", "tagmsg2", "me@nowhere.org"),
+            ("7th", None)
+        ]
+        # pylint: disable=unused-variable
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages_and_tags=input_data)
+        out_file = os.path.join(self.tmp_dir, 'outfile')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'rpm', '-o', out_file, '-t'])
+        assert os.path.exists(out_file)
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        assert len(lines) == 15
+        assert lines[0].endswith('> - current')
+        assert lines[3].endswith('> - 1.0.2')
+        assert lines[3].find('me@nowhere.org') > 0
+        assert lines[7].endswith('> - 1.0.1')
+        assert lines[7].find('author@example.com') > 0
+        assert lines[11].endswith('> - 1.0.0')
+        assert lines[11].find('author@example.com') > 0
