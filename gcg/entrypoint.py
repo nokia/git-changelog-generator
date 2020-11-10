@@ -412,7 +412,7 @@ def traverse_version_tree(client, repo, options, upper_limit, lower_limit):
     curr_entry = list()
     curr_tag = ''
     bugtracking_regexp = re.compile(options.bug_tracking_pattern, re.MULTILINE)
-    tag_filter = TagFilter(None, options.tag_prefix)
+    tag_filter = TagFilter(options.custom_tag_pattern, options.tag_prefix)
 
     for commit in repo_iterate(repo, upper_limit, lower_limit):
         logging.debug("Processing commit %s (%s)", commit.hexsha,

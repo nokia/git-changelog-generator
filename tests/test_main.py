@@ -233,6 +233,51 @@ class TestMain(object):
         for i in range(1, count):
             assert lines[count-i].startswith('- {}'.format(i))
 
+    def test_without_custom_tagpattern(self):
+        input_data = [
+            ("1st", None),
+            ("2nd", None),
+            ("3rd", "version1.0"),
+            ("4th", None),
+            ("5th", "version1.1"),
+            ("6th", None)
+        ]
+        # pylint: disable=unused-variable
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages_and_tags=input_data)
+        out_file = os.path.join(self.tmp_dir, 'outfilexx')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'rpm', '-o', out_file])
+        assert os.path.exists(out_file)
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        count = len(lines) - 1
+        assert count == 7
+        assert lines[0].endswith('> - current')
+        for i in range(1, count):
+            assert lines[count-i].startswith('- {}'.format(i))
+
+    def test_with_custom_tagpattern(self):
+        input_data = [
+            ("1st", None),
+            ("2nd", None),
+            ("3rd", "version1.0"),
+            ("4th", None),
+            ("5th", "version1.1"),
+            ("6th", None)
+        ]
+        # pylint: disable=unused-variable
+        (path, repo, client) = prepare_git_repo(
+            self.tmp_dir, messages_and_tags=input_data)
+        out_file = os.path.join(self.tmp_dir, 'outfilexx')
+        assert err.SUCCESS == gcg.entrypoint.main([
+            'xyz', '-p', path, '-O', 'rpm', '-o', out_file, '-T', r'.*'])
+        assert os.path.exists(out_file)
+        lines = [line.rstrip('\n') for line in open(out_file)]
+        assert len(lines) == 12
+        assert lines[0].endswith('> - current')
+        assert lines[3].endswith('> - version1.1')
+        assert lines[7].endswith('> - version1.0')
+
     def test_without_prefix(self):
         input_data = [
             ("1st", None),
